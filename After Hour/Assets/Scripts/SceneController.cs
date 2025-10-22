@@ -1,14 +1,14 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SceneController : MonoBehaviour
 {
     public string level;
     public GameObject Mainmenu;
+    public GameObject Exposition;
     public GameObject ControlMenu;
 
 
@@ -27,6 +27,8 @@ public class SceneController : MonoBehaviour
     public float dimVolume = 0.2f;
     public float fadeSpeed = 2f;
 
+    public AudioSource stepssound;
+
 
     private void Start()
     {
@@ -34,6 +36,84 @@ public class SceneController : MonoBehaviour
         ContinueText.gameObject.SetActive(false);
         SkipText.gameObject.SetActive(false);
 
+    }
+    public GameObject gmPanel;
+    public float fadeDuration = 1.5f;
+
+    private Image panelImage;
+    private Coroutine fadeCoroutine;
+
+    private void Awake()
+    {
+        panelImage = gmPanel.GetComponent<Image>();
+
+        Color color = panelImage.color;
+        color.a = 0f;
+        panelImage.color = color;
+    }
+
+    public void FadeSequence()
+    {
+        StartCoroutine(FadeWithDelay());
+    }
+
+    private IEnumerator FadeWithDelay()
+    {
+        FadeToBlack();             // Fade to black
+        yield return new WaitForSeconds(fadeDuration);  // Wait for 1 second
+        FadeFromBlack();           // Then fade from black
+        StartTyping();
+    }
+
+    public void FadeSequence2()
+    {
+        StartCoroutine(FadeWithDelay2());
+    }
+
+    private IEnumerator FadeWithDelay2()
+    {
+        FadeToBlack2();
+        stepssound.PlayOneShot(stepssound.clip);
+        yield return new WaitForSeconds(4f);  // Wait for 1 second
+        SceneManager.LoadScene(level);
+    }
+
+    public void FadeToBlack2()
+    {
+        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+        fadeCoroutine = StartCoroutine(Fade(0f, 1f, Mainmenu, false));
+    }
+
+    public void FadeToBlack()
+    {
+        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+        fadeCoroutine = StartCoroutine(Fade(0f, 1f, Mainmenu, false));
+    }
+
+    public void FadeFromBlack()
+    {
+        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+        fadeCoroutine = StartCoroutine(Fade(1f, 0f, Exposition, true));
+    }
+
+    private IEnumerator Fade(float startAlpha, float endAlpha, GameObject target, bool enable)
+    {
+        if (enable) target.SetActive(enable);
+        float timeElapsed = 0f;
+        Color color = panelImage.color;
+
+        while (timeElapsed < fadeDuration)
+        {
+            float t = timeElapsed / fadeDuration;
+            color.a = Mathf.Lerp(startAlpha, endAlpha, t);
+            panelImage.color = color;
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        color.a = endAlpha;
+        panelImage.color = color;
+        if (!enable) target.SetActive(enable);
     }
 
     public void NextLevel()
@@ -48,19 +128,19 @@ public class SceneController : MonoBehaviour
 
     private void Update()
     {
-        
+
         if (Input.GetKeyUp(KeyCode.Escape))
         {
             StopCoroutine(typingCoroutine);
             textUI.text = fullText;
             ContinueText.gameObject.SetActive(true);
             TextComplete = true;
-           
+
         }
 
-        if(TextComplete == true && Input.anyKeyDown)
+        if (TextComplete == true && Input.anyKeyDown)
         {
-            SceneManager.LoadScene(level);
+            FadeSequence2();
         }
     }
 
@@ -81,13 +161,13 @@ public class SceneController : MonoBehaviour
 
     IEnumerator TypeText(string text)
     {
-        textUI.text = ""; 
+        textUI.text = "";
         foreach (char c in text)
         {
             textUI.text += c;
             if (typingSound != null && !char.IsWhiteSpace(c))
             {
-                typingSound.pitch = Random.Range(0.95f, 1.05f); 
+                typingSound.pitch = Random.Range(0.95f, 1.05f);
                 typingSound.PlayOneShot(typingSound.clip);
             }
             yield return new WaitForSeconds(typingSpeed);

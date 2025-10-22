@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Text
   - Laptop
+  - Random
   layers:
   - Default
   - TransparentFX

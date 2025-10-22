@@ -20,6 +20,7 @@ public class Laptop : MonoBehaviour
     public float fadeSpeed = 2f;
 
     private float originalVolume;
+    public AudioSource LaptopSound;
 
     public AudioSource typingSound;
     void Start()
@@ -91,6 +92,7 @@ public class Laptop : MonoBehaviour
             print("Hi");
             animator.SetTrigger("Collided");
             Light.SetActive(false);
+            LaptopSound.PlayOneShot(LaptopSound.clip);
         }
     }
 

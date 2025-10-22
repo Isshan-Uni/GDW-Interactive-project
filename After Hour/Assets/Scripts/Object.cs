@@ -8,6 +8,7 @@ public class Object : MonoBehaviour
     public string OptionE;
     public string OptionQ;
 
+
     void Start()
     {
         
@@ -18,6 +19,7 @@ public class Object : MonoBehaviour
     {
         
     }
+
 
 
 }
